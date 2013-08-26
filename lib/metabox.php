@@ -348,8 +348,8 @@ class Framework_of_Oz_Metabox{
 						//===============================================
 						case 'file':
 							echo "<input id='$id' class='$class width-three-quarters' name='$name' type='text' value='$value' $atts>";
-							echo "<div><button type='button' class='button width-quarter'>$button</button></div>";
-							echo "<div class='oz-preview' data-filetypes='",$filetypes,"'></div>";
+							echo "<div><button type='button' data-filetypes='",$filetypes,"' class='button width-quarter'>$button</button></div>";
+							echo "<div class='oz-preview'></div>";
 						break;
 						//===============================================
 						// Editor
@@ -444,7 +444,7 @@ class Framework_of_Oz_Metabox{
 		$oz->def($field['button'], 		'Media Library');
 		$oz->def($field['desc'], 		'');
 		$oz->def($field['atts'], 		'');
-		$oz->def($field['filetypes'], 	'');
+		$oz->def($field['filetypes'], 	'image');
 		$oz->def($field['stack'], 		'');
 		$oz->def($field['cap'], 		'manage_options');
 		$oz->def($field['repeat'], 		false);

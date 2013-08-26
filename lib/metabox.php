@@ -31,13 +31,8 @@ class Framework_of_Oz_Metabox{
 
 		//- - - - - - - - - - - - - - - - - - - - - - - -
 		// Get the post ID
-		//- - - - - - - - - - - - - - - - - - - - - - - -
-		$postID = false;
-		if(isset($_GET['post']))
-			$postID = $_GET['post'];
-		elseif(isset($_POST['post_ID']))
-			$postID = $_POST['post_ID'];
-		if(!$postID && !$this->isMenupage) return false;
+		//- - - - - - - - - - - - - - - - - - - - - - - -	
+		if(!($postID = $oz->admin_post_id()) && !$this->isMenupage) return false;
 		$this->postID = $postID;
 		//- - - - - - - - - - - - - - - - - - - - - - - -
 		// Get the page

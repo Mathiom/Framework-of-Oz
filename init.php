@@ -100,7 +100,19 @@ if(!class_exists('Framework_of_Oz')){
 		//===============================================
 		function deslug($slug){
 			return ucwords(str_replace('-', ' ', $slug));
-		}		
+		}
+
+		//===============================================
+		// Get the ID of the current post in the Admin
+		//===============================================
+		function admin_post_id(){
+			$postID = false;
+			if(isset($_GET['post']))
+				$postID = $_GET['post'];
+			elseif(isset($_POST['post_ID']))
+				$postID = $_POST['post_ID'];
+			return $postID;
+		}
 	}
 
 	//###############################################

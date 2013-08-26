@@ -9,9 +9,12 @@ array(
 	'id'			=> #REQUIRED#,			//(STR) The metabox id, should be a slug
 	'label'			=> $oz->deslug(%id), 	//(STR) Metaboxes title
 	'post-types'	=> '*',					//(STR/ARR) List of post types, by id, to attach this metabox to. 
-											//Strings should be comma separated and w/o spaces. 
-											//* will show in all post types
-											//* + other post types will exclude those, eg '*,page,post' will show EVERYWHERE except pages and posts
+												//Strings should be comma separated and w/o spaces. 
+												//* will show in all post types
+												//* + other post types will exclude those, eg '*,page,post' will show EVERYWHERE except pages and posts
+	'posts'			=> '',					//(INT/ARR) The list of comma separated post ID's to display this metabox on (note: post refers to any CPT, page, or post)
+												//If the id is negative, then the metabox will NOT show on that post
+												//If this is present, it will override 'post_types' as an ID can belong to any post type
 	'page'			=> '',					//The menupage ID to display on
 	'priority'		=> 'default',			//(STR) The priority. Possible == (high, core, default, low) See: http://codex.wordpress.org/Function_Reference/add_meta_box
 	'context'		=> 'normal',			//(STR) The context. Possible == (normal, advanced, side). See the link above
@@ -19,6 +22,7 @@ array(
 		array(
 			'type'		=> 'text',				//(STR) The field type. See the listing below
 			'label'		=> $oz->deslug(%type), 	//(STR) The string for the fields associated label
+			'button'	=> 'Media Library', 	//(STR) Button label
 			'desc'		=> '', 					//(STR) Descriptive text shown below the field
 			'stack'		=> false,				//(BOOL) Whether we should stack the label above the field. By default, they are arranged horizontally
 			'class'		=> '',					//(STR) A space separated list of extra classes to add. They all recieve 'oz-field oz-%type'

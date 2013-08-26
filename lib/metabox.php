@@ -65,21 +65,46 @@ class Framework_of_Oz_Metabox{
 		$oz->def($this->mb['label'], 		$oz->deslug($this->mb['id']));
 		$oz->def($this->mb['context'], 		'normal');
 		$oz->def($this->mb['priority'], 	'default');
+		$oz->def($this->mb['posts'], 		array());
+
+		//- - - - - - - - - - - - - - - - - - - - - - - -
+		// Explode posts to array
+		//- - - - - - - - - - - - - - - - - - - - - - - -
+		if(is_integer($this->mb['posts'])) $this->mb['posts'] = array($this->mb['posts']);
+		if(is_string($this->mb['posts'])) $this->mb['posts'] = explode(',', $this->mb['posts']);
 
 		//===============================================
 		// Attach the metabox to required CPT's
 		//===============================================
-		foreach($this->get_cpts() as $cpt){
-			//- - - - - - - - - - - - - - - - - - - - - - - -
-			// If cpt is a menupage, change the cpt value to match
-			//- - - - - - - - - - - - - - - - - - - - - - - -
-			if($this->isMenupage && $cpt == $this->mb['page']){
-				$cpt = get_current_screen();
-				$cpt = $cpt->base;
-				add_action('load-'.$cpt, array(&$this, 'save_options'));
+		if(!count($this->mb['posts'])):
+			foreach($this->get_cpts() as $cpt){
+				//- - - - - - - - - - - - - - - - - - - - - - - -
+				// If cpt is a menupage, change the cpt value to match
+				//- - - - - - - - - - - - - - - - - - - - - - - -
+				if($this->isMenupage && $cpt == $this->mb['page']){
+					$cpt = get_current_screen();
+					$cpt = $cpt->base;
+					add_action('load-'.$cpt, array(&$this, 'save_options'));
+				//- - - - - - - - - - - - - - - - - - - - - - - -
+				// Otherwise only continue if the user hasn't excluded this post ID
+				//- - - - - - - - - - - - - - - - - - - - - - - -
+				} else {
+					//- - - - - - - - - - - - - - - - - - - - - - - -
+					// Only include specific post ID's
+					//- - - - - - - - - - - - - - - - - - - - - - - -
+					if(in_array($this->postID * -1, $this->mb['posts'])) continue;
+				}
+				add_meta_box($this->mb['id'], $this->mb['label'], array(&$this, 'initialize_metabox'), $cpt, $this->mb['context'], $this->mb['priority']);
 			}
-			add_meta_box($this->mb['id'], $this->mb['label'], array(&$this, 'initialize_metabox'), $cpt, $this->mb['context'], $this->mb['priority']);
-		}
+		//===============================================
+		// Attach to specific ID's
+		//===============================================
+		else:
+			if(in_array($postID, $this->mb['posts'])){
+				$cpt = get_post_type($postID);
+				add_meta_box($this->mb['id'], $this->mb['label'], array(&$this, 'initialize_metabox'), $cpt, $this->mb['context'], $this->mb['priority']);
+			}
+		endif;
 	}
 
 	//===============================================
@@ -421,6 +446,7 @@ class Framework_of_Oz_Metabox{
 		if($noDefaults) return;
 
 		$oz->def($field['label'], 		$oz->deslug($field['id']));
+		$oz->def($field['button'], 		'Media Library');
 		$oz->def($field['desc'], 		'');
 		$oz->def($field['atts'], 		'');
 		$oz->def($field['filetypes'], 	'');

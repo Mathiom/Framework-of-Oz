@@ -3,6 +3,8 @@
 // :: Create i18n post types, taxonomies, admin pages
 // and metaboxes. Fast.
 //
+// :: https://github.com/Mathiom/Framework-of-Oz
+//
 // :: Requires PHP 5.3+
 //###############################################
 if(!class_exists('Framework_of_Oz')){

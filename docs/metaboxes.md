@@ -12,10 +12,12 @@ array(
 												//Strings should be comma separated and w/o spaces. 
 												//* will show in all post types
 												//* + other post types will exclude those, eg '*,page,post' will show EVERYWHERE except pages and posts
-	'posts'			=> '',					//(INT/ARR) The list of comma separated post ID's to display this metabox on (note: post refers to any CPT, page, or post)
-												//If the id is negative, then the metabox will NOT show on that post
-												//If this is present, it will override 'post_types' as an ID can belong to any post type
-	'page'			=> '',					//The menupage ID to display on
+	'include-ids'	=> '',					//(INT/ARR) The list of comma separated post ID's to include...regardless of post-type
+	'exclude-ids'	=> '',					//(INT/ARR) List of id's to exclude...regardless of post type
+	'only-ids'		=> '',					//(INT/ARR) ONLY include these ID's...regardless of post type
+	'page'			=> '',					//(STR) The menupage ID to display on. Only 
+	'templates'		=> '',					//(INT/ARR) The list of comma separated template filenames for this metabox. So if you have a template named 'about.php', then 'about.php' is the template name.
+												//If the template is in a directory inside the themes folder, then the template name includes the directory(-ies). So if you have a template, 'about.php' inside the folder 'templates/', then the template name is 'templates/about.php'
 	'priority'		=> 'default',			//(STR) The priority. Possible == (high, core, default, low) See: http://codex.wordpress.org/Function_Reference/add_meta_box
 	'context'		=> 'normal',			//(STR) The context. Possible == (normal, advanced, side). See the link above
 	'fields'		=> array(				//(STR/ARR) #REQUIRED# list of fields. See the "Creating Fields" section for more information

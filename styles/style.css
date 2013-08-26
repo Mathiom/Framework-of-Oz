@@ -27,6 +27,9 @@
   .oz-label.stacked {
     width: 100%; }
 
+.oz-description {
+  opacity: 0.6; }
+
 input.oz-file {
   width: 75%; }
 

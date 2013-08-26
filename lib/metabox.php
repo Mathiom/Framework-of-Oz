@@ -52,7 +52,7 @@ class Framework_of_Oz_Metabox{
 		// Add page as post type
 		//===============================================
 		if($this->isMenupage)
-			$this->mb['post_types'][] = $this->mb['page'];
+			$this->mb['post-types'][] = $this->mb['page'];
 
 		//===============================================
 		// Defaults
@@ -60,46 +60,70 @@ class Framework_of_Oz_Metabox{
 		$oz->def($this->mb['label'], 		$oz->deslug($this->mb['id']));
 		$oz->def($this->mb['context'], 		'normal');
 		$oz->def($this->mb['priority'], 	'default');
-		$oz->def($this->mb['posts'], 		array());
+		$oz->def($this->mb['include-ids'], 		array());
+		$oz->def($this->mb['exclude-ids'], 		array());
+		$oz->def($this->mb['only-ids'], 		array());
+		$oz->def($this->mb['templates'], 		array());
 
 		//- - - - - - - - - - - - - - - - - - - - - - - -
 		// Explode posts to array
 		//- - - - - - - - - - - - - - - - - - - - - - - -
-		if(is_integer($this->mb['posts'])) $this->mb['posts'] = array($this->mb['posts']);
-		if(is_string($this->mb['posts'])) $this->mb['posts'] = explode(',', $this->mb['posts']);
+		if(is_integer($this->mb['include-ids'])) $this->mb['include-ids'] = array($this->mb['include-ids']);
+		if(is_string($this->mb['include-ids'])) $this->mb['include-ids'] = explode(',', $this->mb['include-ids']);
+		if(is_integer($this->mb['exclude-ids'])) $this->mb['exclude-ids'] = array($this->mb['exclude-ids']);
+		if(is_string($this->mb['exclude-ids'])) $this->mb['exclude-ids'] = explode(',', $this->mb['exclude-ids']);
+		if(is_integer($this->mb['only-ids'])) $this->mb['only-ids'] = array($this->mb['only-ids']);
+		if(is_string($this->mb['only-ids'])) $this->mb['only-ids'] = explode(',', $this->mb['only-ids']);
 
+		//- - - - - - - - - - - - - - - - - - - - - - - -
+		// Get the current Post Type
+		//- - - - - - - - - - - - - - - - - - - - - - - -
+		$this->get_cpts();
+		$screen = get_current_screen();
+		$cpt = $screen->post_type;
+
+		//- - - - - - - - - - - - - - - - - - - - - - - -
+		// Get templates
+		//- - - - - - - - - - - - - - - - - - - - - - - -
+		if(is_string($this->mb['templates'])) $this->mb['templates'] = explode(',', $this->mb['templates']);
+		if(!$this->isMenupage) $template = get_post_meta($postID, '_wp_page_template', true);
+
+		//###############################################
+		// Attach Metaboxes
+		//###############################################
 		//===============================================
-		// Attach the metabox to required CPT's
+		// MenuPages
 		//===============================================
-		if(!count($this->mb['posts'])):
-			foreach($this->get_cpts() as $cpt){
-				//- - - - - - - - - - - - - - - - - - - - - - - -
-				// If cpt is a menupage, change the cpt value to match
-				//- - - - - - - - - - - - - - - - - - - - - - - -
-				if($this->isMenupage && $cpt == $this->mb['page']){
-					$cpt = get_current_screen();
-					$cpt = $cpt->base;
-					add_action('load-'.$cpt, array(&$this, 'save_options'));
-				//- - - - - - - - - - - - - - - - - - - - - - - -
-				// Otherwise only continue if the user hasn't excluded this post ID
-				//- - - - - - - - - - - - - - - - - - - - - - - -
-				} else {
-					//- - - - - - - - - - - - - - - - - - - - - - - -
-					// Only include specific post ID's
-					//- - - - - - - - - - - - - - - - - - - - - - - -
-					if(in_array($this->postID * -1, $this->mb['posts'])) continue;
-				}
-				add_meta_box($this->mb['id'], $this->mb['label'], array(&$this, 'initialize_metabox'), $cpt, $this->mb['context'], $this->mb['priority']);
-			}
+		if($this->isMenupage){
+			if($cpt == $this->mb['page'])
+				add_action('load-'.$cpt, array(&$this, 'save_options'));
+			return false;
 		//===============================================
-		// Attach to specific ID's
+		// ONLY include list
 		//===============================================
-		else:
-			if(in_array($postID, $this->mb['posts'])){
-				$cpt = get_post_type($postID);
-				add_meta_box($this->mb['id'], $this->mb['label'], array(&$this, 'initialize_metabox'), $cpt, $this->mb['context'], $this->mb['priority']);
-			}
-		endif;
+		} elseif(count($this->mb['only-ids'])) {
+			if($template && count($this->mb['templates']) && !in_array($template, $this->mb['templates'])) return;
+			if(!in_array($postID, $this->mb['only-ids'])) return false;
+		//===============================================
+		// Normal CPTs
+		//===============================================
+		} else {
+			//- - - - - - - - - - - - - - - - - - - - - - - -
+			// Does not have template
+			//- - - - - - - - - - - - - - - - - - - - - - - -
+			if($template && count($this->mb['templates']) && !in_array($template, $this->mb['templates'])) return;
+			//- - - - - - - - - - - - - - - - - - - - - - - -
+			// In exclude list
+			//- - - - - - - - - - - - - - - - - - - - - - - -
+			if(in_array($postID, $this->mb['exclude-ids'])) return false;
+			//- - - - - - - - - - - - - - - - - - - - - - - -
+			// Not in post type && Note in includes list
+			//- - - - - - - - - - - - - - - - - - - - - - - -
+			if(!in_array($cpt, $this->mb['post-types']) && !in_array($postID, $this->mb['include-ids'])) return;
+			elseif(!in_array($cpt, $this->mb['post-types'])) return;
+		}
+
+		add_meta_box($this->mb['id'], $this->mb['label'], array(&$this, 'initialize_metabox'), $cpt, $this->mb['context'], $this->mb['priority']);
 	}
 
 	//===============================================
@@ -284,7 +308,7 @@ class Framework_of_Oz_Metabox{
 		//- - - - - - - - - - - - - - - - - - - - - - - -
 		if(count($parents)){
 			$id .= '[' . $groupID . ']';
-			$value = $value[$groupID];
+			$value = isset($value[$groupID]) ? $value[$groupID] : '';
 		}
 		$name 	= $id;
 
@@ -356,7 +380,8 @@ class Framework_of_Oz_Metabox{
 						//===============================================
 						case 'editor':
 							wp_editor($value, $id, array(
-								'textarea_name'	=> $name
+								'textarea_name'	=> $name,
+								'editor_class' => $class
 							));				
 						break;
 						//===============================================
@@ -376,7 +401,7 @@ class Framework_of_Oz_Metabox{
 							<button type="button" class="oz-repeater-add button">+</button><button type="button" class="oz-repeater-remove button">-</button>
 						</div>';
 					}
-
+					echo '<div class="oz-description">',esc_html($desc),'</div>';
 				echo '</div>';	//.oz-field-wrap
 
 				//- - - - - - - - - - - - - - - - - - - - - - - -
@@ -448,7 +473,7 @@ class Framework_of_Oz_Metabox{
 		$oz->def($field['stack'], 		'');
 		$oz->def($field['cap'], 		'manage_options');
 		$oz->def($field['repeat'], 		false);
-		$field['class'] = $oz->def($field['class'], 	'') . ' oz-field oz-' . $field['type']. ' ';		
+		$field['class'] = $oz->def($field['class'], '') . ' oz-field oz-' . $field['type']. ' ';		
 	}
 
 	//###############################################
@@ -507,7 +532,6 @@ class Framework_of_Oz_Metabox{
 		//- - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 		// Compare the page being saved with the one defined
 		//- - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-		$page = get_current_screen();
 		if($_GET['page'] != $this->mb['page']) return add_action('admin_notices', array(&$this, 'notice_wrong_page'));
 
 		//===============================================

@@ -9,6 +9,7 @@ class Framework_of_Oz_Metabox{
 	public $mb;		//A copy of the original metabox
 	public $meta;	//The post meta for this metabox
 	public $postID; //The current post ID
+	public $postCPT;	//The current posts CPT
 	public $isMenupage;	//Whether we are in a menupage or posttype
 
 	function __construct($mb){
@@ -21,6 +22,89 @@ class Framework_of_Oz_Metabox{
 		add_action('add_meta_boxes', array(&$this, 'prepare'));
 		if(!$this->isMenupage = isset($mb['page']))
 			add_action('save_post', array(&$this, 'save'));
+	}
+
+	//===============================================
+	// Sanitizes the Metabox
+	// :: RETURNS (BOOL) whether this metabox belongs to thigs post
+	//===============================================
+	function sanitize(){
+		global $oz;
+
+		//===============================================
+		// Defaults
+		//===============================================
+		$oz->def($this->mb['label'], 		$oz->deslug($this->mb['id']));
+		$oz->def($this->mb['context'], 		'normal');
+		$oz->def($this->mb['priority'], 	'default');
+		$oz->def($this->mb['include-ids'], 		array());
+		$oz->def($this->mb['exclude-ids'], 		array());
+		$oz->def($this->mb['only-ids'], 		array());
+		$oz->def($this->mb['templates'], 		array());
+
+		//- - - - - - - - - - - - - - - - - - - - - - - -
+		// Explode posts to array
+		//- - - - - - - - - - - - - - - - - - - - - - - -
+		if(is_integer($this->mb['include-ids'])) $this->mb['include-ids'] = array($this->mb['include-ids']);
+		if(is_string($this->mb['include-ids'])) $this->mb['include-ids'] = explode(',', $this->mb['include-ids']);
+		if(is_integer($this->mb['exclude-ids'])) $this->mb['exclude-ids'] = array($this->mb['exclude-ids']);
+		if(is_string($this->mb['exclude-ids'])) $this->mb['exclude-ids'] = explode(',', $this->mb['exclude-ids']);
+		if(is_integer($this->mb['only-ids'])) $this->mb['only-ids'] = array($this->mb['only-ids']);
+		if(is_string($this->mb['only-ids'])) $this->mb['only-ids'] = explode(',', $this->mb['only-ids']);
+
+		//- - - - - - - - - - - - - - - - - - - - - - - -
+		// Get Post Types / Templates
+		//- - - - - - - - - - - - - - - - - - - - - - - -
+		$this->get_cpts();
+		if(is_string($this->mb['templates'])) $this->mb['templates'] = explode(',', $this->mb['templates']);
+
+		return $this->validate();
+	}
+
+	//===============================================
+	// Checks if we are in the correct screen
+	//===============================================
+	function validate(){
+		//- - - - - - - - - - - - - - - - - - - - - - - -
+		// Get the current Post Type
+		//- - - - - - - - - - - - - - - - - - - - - - - -
+		$screen = get_current_screen();
+		$cpt = $screen->post_type;
+		$this->postCPT = $cpt;
+		if(!$this->isMenupage) $template = get_post_meta($this->postID, '_wp_page_template', true);
+
+		//===============================================
+		// MenuPages
+		//===============================================
+		if($this->isMenupage){
+			if($cpt == $this->mb['page'])
+				add_action('load-'.$cpt, array(&$this, 'save_options'));
+			return false;
+		//===============================================
+		// ONLY include list
+		//===============================================
+		} elseif(count($this->mb['only-ids'])) {
+			if($template && count($this->mb['templates']) && !in_array($template, $this->mb['templates'])) return;
+			if(!in_array($this->postID, $this->mb['only-ids'])) return false;
+		//===============================================
+		// Normal CPTs
+		//===============================================
+		} else {
+			//- - - - - - - - - - - - - - - - - - - - - - - -
+			// Does not have template
+			//- - - - - - - - - - - - - - - - - - - - - - - -
+			if(count($this->mb['templates']) && !in_array($template, $this->mb['templates'])) return;
+			//- - - - - - - - - - - - - - - - - - - - - - - -
+			// In exclude list
+			//- - - - - - - - - - - - - - - - - - - - - - - -
+			if(in_array($this->postID, $this->mb['exclude-ids'])) return false;
+			//- - - - - - - - - - - - - - - - - - - - - - - -
+			// Not in post type && Note in includes list
+			//- - - - - - - - - - - - - - - - - - - - - - - -
+			if(!in_array($cpt, $this->mb['post-types']) && !in_array($this->postID, $this->mb['include-ids'])) return;
+			elseif(!in_array($cpt, $this->mb['post-types'])) return;
+		}
+		return true;
 	}
 
 	//===============================================
@@ -55,76 +139,11 @@ class Framework_of_Oz_Metabox{
 		if($this->isMenupage)
 			$this->mb['post-types'][] = $this->mb['page'];
 
-		//===============================================
-		// Defaults
-		//===============================================
-		$oz->def($this->mb['label'], 		$oz->deslug($this->mb['id']));
-		$oz->def($this->mb['context'], 		'normal');
-		$oz->def($this->mb['priority'], 	'default');
-		$oz->def($this->mb['include-ids'], 		array());
-		$oz->def($this->mb['exclude-ids'], 		array());
-		$oz->def($this->mb['only-ids'], 		array());
-		$oz->def($this->mb['templates'], 		array());
-
-		//- - - - - - - - - - - - - - - - - - - - - - - -
-		// Explode posts to array
-		//- - - - - - - - - - - - - - - - - - - - - - - -
-		if(is_integer($this->mb['include-ids'])) $this->mb['include-ids'] = array($this->mb['include-ids']);
-		if(is_string($this->mb['include-ids'])) $this->mb['include-ids'] = explode(',', $this->mb['include-ids']);
-		if(is_integer($this->mb['exclude-ids'])) $this->mb['exclude-ids'] = array($this->mb['exclude-ids']);
-		if(is_string($this->mb['exclude-ids'])) $this->mb['exclude-ids'] = explode(',', $this->mb['exclude-ids']);
-		if(is_integer($this->mb['only-ids'])) $this->mb['only-ids'] = array($this->mb['only-ids']);
-		if(is_string($this->mb['only-ids'])) $this->mb['only-ids'] = explode(',', $this->mb['only-ids']);
-
-		//- - - - - - - - - - - - - - - - - - - - - - - -
-		// Get the current Post Type
-		//- - - - - - - - - - - - - - - - - - - - - - - -
-		$this->get_cpts();
-		$screen = get_current_screen();
-		$cpt = $screen->post_type;
-
-		//- - - - - - - - - - - - - - - - - - - - - - - -
-		// Get templates
-		//- - - - - - - - - - - - - - - - - - - - - - - -
-		if(is_string($this->mb['templates'])) $this->mb['templates'] = explode(',', $this->mb['templates']);
-		if(!$this->isMenupage) $template = get_post_meta($postID, '_wp_page_template', true);
-
 		//###############################################
 		// Attach Metaboxes
 		//###############################################
-		//===============================================
-		// MenuPages
-		//===============================================
-		if($this->isMenupage){
-			if($cpt == $this->mb['page'])
-				add_action('load-'.$cpt, array(&$this, 'save_options'));
-			return false;
-		//===============================================
-		// ONLY include list
-		//===============================================
-		} elseif(count($this->mb['only-ids'])) {
-			if($template && count($this->mb['templates']) && !in_array($template, $this->mb['templates'])) return;
-			if(!in_array($postID, $this->mb['only-ids'])) return false;
-		//===============================================
-		// Normal CPTs
-		//===============================================
-		} else {
-			//- - - - - - - - - - - - - - - - - - - - - - - -
-			// Does not have template
-			//- - - - - - - - - - - - - - - - - - - - - - - -
-			if(count($this->mb['templates']) && !in_array($template, $this->mb['templates'])) return;
-			//- - - - - - - - - - - - - - - - - - - - - - - -
-			// In exclude list
-			//- - - - - - - - - - - - - - - - - - - - - - - -
-			if(in_array($postID, $this->mb['exclude-ids'])) return false;
-			//- - - - - - - - - - - - - - - - - - - - - - - -
-			// Not in post type && Note in includes list
-			//- - - - - - - - - - - - - - - - - - - - - - - -
-			if(!in_array($cpt, $this->mb['post-types']) && !in_array($postID, $this->mb['include-ids'])) return;
-			elseif(!in_array($cpt, $this->mb['post-types'])) return;
-		}
-
-		add_meta_box($this->mb['id'], $this->mb['label'], array(&$this, 'initialize_metabox'), $cpt, $this->mb['context'], $this->mb['priority']);
+		if(!$this->sanitize()) return false;
+		add_meta_box($this->mb['id'], $this->mb['label'], array(&$this, 'initialize_metabox'), $this->postCPT, $this->mb['context'], $this->mb['priority']);
 	}
 
 	//===============================================
@@ -508,14 +527,12 @@ class Framework_of_Oz_Metabox{
 		if(defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
 			return $postID;
 		if(wp_is_post_revision($postID)) return false;
-		//- - - - - - - - - - - - - - - - - - - - - - - -
-		// Save only if we are in the right CPT
-		//- - - - - - - - - - - - - - - - - - - - - - - -
-		$postType = get_post_type();
-		$this->get_cpts();
-		$mbPostTypes = $this->mb['post-types'];
-		if(!in_array($postType, $mbPostTypes))
-			return $postID;
+
+		//===============================================
+		// Save only if post meets requirements
+		//===============================================
+		$this->postID = $postID;
+		if(!$this->sanitize()) return false;
 
 		//===============================================
 		// Go through each $_POST object and try to save

@@ -6,9 +6,7 @@ class Framework_of_Oz_CPT{
 	public $cpts;	//Collection of loaded cpts
 
 	function __construct($cpt){
-		if(!is_admin()) return;
 		$this->cpt 	= $cpt;
-
 		add_action('init', array(&$this, 'create'));
 	}
 
@@ -75,7 +73,10 @@ class Framework_of_Oz_CPT{
 			add_action('admin_footer', array(&$this, 'icon'));
 		}
 
-		register_post_type($cpt['id'], $cpt);
+		//register_post_type($cpt['id'], $cpt);
+		register_post_type('team', array(
+			'public'	=> true
+		));
 	}
 
 	//===============================================

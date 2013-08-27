@@ -28,11 +28,12 @@ class Framework_of_Oz_Metabox{
 	//===============================================
 	function prepare(){
 		global $oz;
+		global $current_screen;
 
 		//- - - - - - - - - - - - - - - - - - - - - - - -
 		// Get the post ID
 		//- - - - - - - - - - - - - - - - - - - - - - - -	
-		if(!($postID = $oz->admin_post_id()) && !$this->isMenupage) return false;
+		if(!($postID = $oz->admin_post_id()) && $current_screen->action != 'add') return false;
 		$this->postID = $postID;
 		//- - - - - - - - - - - - - - - - - - - - - - - -
 		// Get the page
@@ -111,7 +112,7 @@ class Framework_of_Oz_Metabox{
 			//- - - - - - - - - - - - - - - - - - - - - - - -
 			// Does not have template
 			//- - - - - - - - - - - - - - - - - - - - - - - -
-			if($template && count($this->mb['templates']) && !in_array($template, $this->mb['templates'])) return;
+			if(count($this->mb['templates']) && !in_array($template, $this->mb['templates'])) return;
 			//- - - - - - - - - - - - - - - - - - - - - - - -
 			// In exclude list
 			//- - - - - - - - - - - - - - - - - - - - - - - -
@@ -368,9 +369,26 @@ class Framework_of_Oz_Metabox{
 							echo "<input id='$id' class='$class' name='$name' type='$type' value='$value' $atts>";
 						break;
 						//===============================================
+						// Selectbox
+						//===============================================
+						case 'select':
+							//- - - - - - - - - - - - - - - - - - - - - - - -
+							// Convert possible values to array
+							//- - - - - - - - - - - - - - - - - - - - - - - -
+							if(is_string($field['options'])) parse_str($field['options'], $field['options']);
+							if(is_integer($field['options'])) $field['options'] = array($field);
+
+							echo "<select id='$id' class='$class' name='$name' $atts>";
+								foreach($field['options'] as $optionVal=>$optionLabel){
+									echo "<option value='$optionVal' ",($value == $optionVal ? "selected='selected'" : ''),">$optionLabel</option>";
+								}
+							echo '</select>';
+						break;
+						//===============================================
 						// File Upload
 						//===============================================
 						case 'file':
+							$value = esc_attr($value);
 							echo "<input id='$id' class='$class width-three-quarters' name='$name' type='text' value='$value' $atts>";
 							echo "<div><button type='button' data-filetypes='",$filetypes,"' class='button width-quarter'>$button</button></div>";
 							echo "<div class='oz-preview'></div>";
@@ -473,6 +491,7 @@ class Framework_of_Oz_Metabox{
 		$oz->def($field['stack'], 		'');
 		$oz->def($field['cap'], 		'manage_options');
 		$oz->def($field['repeat'], 		false);
+		$oz->def($field['options'], 	array());
 		$field['class'] = $oz->def($field['class'], '') . ' oz-field oz-' . $field['type']. ' ';		
 	}
 

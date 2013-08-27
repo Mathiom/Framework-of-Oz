@@ -8,7 +8,7 @@ class Framework_of_Oz_CPT{
 	function __construct($cpt){
 		if(!is_admin()) return;
 		$this->cpt 	= $cpt;
-		
+
 		add_action('init', array(&$this, 'create'));
 	}
 
@@ -43,6 +43,7 @@ class Framework_of_Oz_CPT{
 		$plural = 	$oz->def($cpt['label'],	 	$id);
 					$oz->def($cpt['labels'], 	array());
 					$oz->def($cpt['mp6-icon'], 	'');
+					$oz->def($cpt['icon'], 		'');
 		//- - - - - - - - - - - - - - - - - - - - - - - -
 		// Labels Defaults
 		//- - - - - - - - - - - - - - - - - - - - - - - -
@@ -60,8 +61,37 @@ class Framework_of_Oz_CPT{
 		$oz->def($cpt['labels']['not_found_in_trash'],	'No ' . $plural . ' found in Trash');
 		$oz->def($cpt['labels']['parent_item_colon'],	'Parent ' . $singular);
 
+		//- - - - - - - - - - - - - - - - - - - - - - - -
+		// Public
+		//- - - - - - - - - - - - - - - - - - - - - - - -
+		$oz->def($cpt['public'], true);
+		$oz->def($cpt['menu_position'], 34.1459);
+
+		//- - - - - - - - - - - - - - - - - - - - - - - -
+		// Oz CPT Spritesheets
+		//- - - - - - - - - - - - - - - - - - - - - - - -
+		if(is_admin() && $cpt['icon']){
+			$this->cpt = $cpt;
+			add_action('admin_footer', array(&$this, 'icon'));
+		}
+
 		register_post_type($cpt['id'], $cpt);
 	}
+
+	//===============================================
+	// Menu/Page Icons
+	//===============================================
+	function icon(){ $cpt = $this->cpt; ?>
+		<style media="screen">
+			#menu-posts-<?php echo $cpt['id'] ?> .wp-menu-image {
+				background: url(<?php echo $cpt['icon'] ?>) no-repeat -3px -4px !important;
+			}
+			#menu-posts-<?php echo $cpt['id'] ?>:hover .wp-menu-image, #menu-posts-<?php echo $cpt['id'] ?>.wp-has-current-submenu .wp-menu-image {
+				background-position: -3px -40px !important;
+			}
+			#icon-edit.icon32-posts-<?php echo $cpt['id'] ?> {background: url(<?php echo $cpt['icon'] ?>) no-repeat -39px -20px;}			
+		</style>
+	<?php }
 }
 
 //###############################################

@@ -32,6 +32,7 @@ array(
 			'filetypes' => 'image',				//(STR) The allowed filetypes for file uploads. Not really sure what other values can be used though...
 			'repeat'	=> false,				//(BOOL) Whether this field is a repeater! Groups are automatically built as repeaters
 			'cap'		=> %menupage_cap		//(STR) The capability type required to save. Only used in menupages for now as an extra layer of security
+			'options'	=> array() 				//(STR/ARR) A parsable string or array of options (LABEL=>VALUE) for select boxes
 		)
 	)
 )
@@ -77,6 +78,20 @@ repeat
 
 **text**, **password**  
 Standard text and password input fields.
+
+**select**
+[options] Standard select box. `options` contains the list of options the selectbox contains. Should either be a parsable string or array, where the key is the value and the label is value...
+```php
+'options' => array(
+	'mammal' 	=> 'Cat',
+	'sport' 	=> 'Football',
+	3.41459 	=> 'pi'
+)
+
+//...or...
+
+'options' => 'mammal=Cat&sport=Football&3.41459=Pi'
+```
 
 **file**  
 [button, filetypes] Media upload textbox and button. Use `button` to change the button and popup label and `filetypes` to set the file type as defined [here](http://wordpress.org/support/topic/using-wps-thickbox-in-a-plugin?replies=17#post-2149133).

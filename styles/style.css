@@ -45,7 +45,8 @@ input.oz-file {
   border: 2px dashed #eeeeee;
   margin: 10px 0;
   padding: 10px;
-  text-align: center; }
+  text-align: center;
+  display: none; }
   .oz-preview img {
     max-width: 100%;
     max-height: 200px;

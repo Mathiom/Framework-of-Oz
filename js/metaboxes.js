@@ -19,6 +19,7 @@ jQuery(function($){
 			var url = $(html).attr('href') || $(html).attr('src');
 			$text.val(url);
 			$preview.html('<img src="' + url + '">');
+			$text.trigger('change');
 			tb_remove();
 			window.send_to_editor = original_send_to_editor;
 		}

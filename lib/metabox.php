@@ -561,6 +561,7 @@ class Framework_of_Oz_Metabox{
 		//- - - - - - - - - - - - - - - - - - - - - - - -
 		// Validate credentials
 		//- - - - - - - - - - - - - - - - - - - - - - - -
+		if(!isset($_POST['oz_metabox'])) return false;
 		if(!is_user_logged_in()) return add_action('admin_notices', array(&$this, 'notice_not_logged_in'));
 		if(isset($_POST['oz_metabox']) && !wp_verify_nonce($_POST['oz_metabox'], 'save_metabox'))
 			return add_action('admin_notices', array(&$this, 'notice_invalid_nonce'));
@@ -584,6 +585,7 @@ class Framework_of_Oz_Metabox{
 				$save[$keyName] = $value;
 			}
 		}
+
 		update_option($this->mb['page'] . '-' . $this->mb['id'], $save);
 		if($save) add_action('admin_notices', array(&$this, 'notice_saved'));
 	}

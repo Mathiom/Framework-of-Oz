@@ -73,10 +73,7 @@ class Framework_of_Oz_CPT{
 			add_action('admin_footer', array(&$this, 'icon'));
 		}
 
-		//register_post_type($cpt['id'], $cpt);
-		register_post_type('team', array(
-			'public'	=> true
-		));
+		register_post_type($cpt['id'], $cpt);
 	}
 
 	//===============================================

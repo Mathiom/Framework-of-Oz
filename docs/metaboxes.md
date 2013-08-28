@@ -18,6 +18,7 @@ array(
 	'page'			=> '',					//(STR) The menupage ID to display on. Only 
 	'templates'		=> '',					//(INT/ARR) The list of comma separated template filenames for this metabox. So if you have a template named 'about.php', then 'about.php' is the template name.
 												//If the template is in a directory inside the themes folder, then the template name includes the directory(-ies). So if you have a template, 'about.php' inside the folder 'templates/', then the template name is 'templates/about.php'
+												//If the post has a template assigned, then metabox MUST contain the template in order to show
 	'priority'		=> 'default',			//(STR) The priority. Possible == (high, core, default, low) See: http://codex.wordpress.org/Function_Reference/add_meta_box
 	'context'		=> 'normal',			//(STR) The context. Possible == (normal, advanced, side). See the link above
 	'fields'		=> array(				//(STR/ARR) #REQUIRED# list of fields. See the "Creating Fields" section for more information

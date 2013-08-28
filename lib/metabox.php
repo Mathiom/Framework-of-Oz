@@ -77,14 +77,15 @@ class Framework_of_Oz_Metabox{
 		// MenuPages
 		//===============================================
 		if($this->isMenupage){
-			if($cpt == $this->mb['page'])
+			if($cpt == $this->mb['page']) {
 				add_action('load-'.$cpt, array(&$this, 'save_options'));
-			return false;
+				return true;
+			}
 		//===============================================
 		// ONLY include list
 		//===============================================
 		} elseif(count($this->mb['only-ids'])) {
-			if($template && count($this->mb['templates']) && !in_array($template, $this->mb['templates'])) return;
+			if(count($this->mb['templates']) && !in_array($template, $this->mb['templates'])) return;
 			if(!in_array($this->postID, $this->mb['only-ids'])) return false;
 		//===============================================
 		// Normal CPTs
@@ -94,6 +95,7 @@ class Framework_of_Oz_Metabox{
 			// Does not have template
 			//- - - - - - - - - - - - - - - - - - - - - - - -
 			if(count($this->mb['templates']) && !in_array($template, $this->mb['templates'])) return;
+			if($template && !in_array($template, $this->mb['templates'])) return;
 			//- - - - - - - - - - - - - - - - - - - - - - - -
 			// In exclude list
 			//- - - - - - - - - - - - - - - - - - - - - - - -
@@ -117,7 +119,7 @@ class Framework_of_Oz_Metabox{
 		//- - - - - - - - - - - - - - - - - - - - - - - -
 		// Get the post ID
 		//- - - - - - - - - - - - - - - - - - - - - - - -	
-		if(!($postID = $oz->admin_post_id()) && $current_screen->action != 'add') return false;
+		if(!($postID = $oz->admin_post_id()) && $current_screen->action != 'add' && $current_screen->post_type) return false;
 		$this->postID = $postID;
 		//- - - - - - - - - - - - - - - - - - - - - - - -
 		// Get the page

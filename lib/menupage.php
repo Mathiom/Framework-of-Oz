@@ -49,7 +49,7 @@ class Framework_of_Oz_Menupage{
 		//- - - - - - - - - - - - - - - - - - - - - - - -
 		// Create the menu item
 		//- - - - - - - - - - - - - - - - - - - - - - - -
-		add_action('admin_menu', array(&$this, 'menu'));
+		add_action('admin_menu', array(&$this, 'menu'), 1);
 		add_filter('metabox', array(&$this, 'output_metaboxes'));
 	}
 

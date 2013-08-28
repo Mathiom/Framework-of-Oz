@@ -41,6 +41,7 @@ class Framework_of_Oz_Metabox{
 		$oz->def($this->mb['exclude-ids'], 		array());
 		$oz->def($this->mb['only-ids'], 		array());
 		$oz->def($this->mb['templates'], 		array());
+		if(isset($this->mb['template']) && !$this->mb['templates']) $this->mb['templates'] = $this->mb['template'];
 
 		//- - - - - - - - - - - - - - - - - - - - - - - -
 		// Explode posts to array
@@ -91,6 +92,11 @@ class Framework_of_Oz_Metabox{
 		// Normal CPTs
 		//===============================================
 		} else {
+			//- - - - - - - - - - - - - - - - - - - - - - - -
+			// Only allow if template is NOT selected
+			//- - - - - - - - - - - - - - - - - - - - - - - -
+			if(in_array('!', $this->mb['templates']) && (!$template || $template=='default')) $template = '!';
+
 			//- - - - - - - - - - - - - - - - - - - - - - - -
 			// Does not have template
 			//- - - - - - - - - - - - - - - - - - - - - - - -

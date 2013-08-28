@@ -77,8 +77,8 @@ class Framework_of_Oz_Metabox{
 		// MenuPages
 		//===============================================
 		if($this->isMenupage){
-			if($cpt == $this->mb['page']) {
-				add_action('load-'.$cpt, array(&$this, 'save_options'));
+			if($_GET['page'] == $this->mb['page']) {
+				add_action('load-'.$screen->id, array(&$this, 'save_options'));
 				return true;
 			}
 		//===============================================
